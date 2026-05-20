@@ -193,4 +193,4 @@ MIT. Use it, fork it, put it in your portfolio, bring it to an interview. Just d
 
 ---
 
-*Built with ☕ and a deep personal grudge against silent data failures by [Kunj](https://github.com/kunjexe)*
+*Built with ☕ and a deep personal grudge against silent data failures by [Mansi](https://github.com/mansipurohit11)*

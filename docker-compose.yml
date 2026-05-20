@@ -1,0 +1,99 @@
+version: '3.8'
+
+services:
+
+  # ── Airflow's own database ─────────────────────────
+  postgres-airflow:
+    image: postgres:15
+    container_name: dw_postgres_airflow
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 10s
+      retries: 5
+    volumes:
+      - postgres_airflow_data:/var/lib/postgresql/data
+
+  # ── Your data warehouse ────────────────────────────
+  postgres-warehouse:
+    image: postgres:15
+    container_name: dw_postgres_warehouse
+    environment:
+      POSTGRES_USER: warehouse
+      POSTGRES_PASSWORD: warehouse
+      POSTGRES_DB: warehouse
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "warehouse"]
+      interval: 10s
+      retries: 5
+    volumes:
+      - postgres_warehouse_data:/var/lib/postgresql/data
+      - ./docker/warehouse_init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  # ── Simulated source transactional DB ─────────────
+  postgres-source:
+    image: postgres:15
+    container_name: dw_postgres_source
+    environment:
+      POSTGRES_USER: sourcedb
+      POSTGRES_PASSWORD: sourcedb
+      POSTGRES_DB: sourcedb
+    ports:
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "sourcedb"]
+      interval: 10s
+      retries: 5
+    volumes:
+      - postgres_source_data:/var/lib/postgresql/data
+      - ./docker/source_init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  # ── DataWatch metadata store ───────────────────────
+  postgres-metadata:
+    image: postgres:15
+    container_name: dw_postgres_metadata
+    environment:
+      POSTGRES_USER: metadata
+      POSTGRES_PASSWORD: metadata
+      POSTGRES_DB: metadata
+    ports:
+      - "5435:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "metadata"]
+      interval: 10s
+      retries: 5
+    volumes:
+      - postgres_metadata_data:/var/lib/postgresql/data
+      - ./docker/metadata_init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  # ── MinIO (S3-compatible local object storage) ─────
+  minio:
+    image: minio/minio:latest
+    container_name: dw_minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # Web console
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      retries: 3
+    volumes:
+      - minio_data:/data
+
+volumes:
+  postgres_airflow_data:
+  postgres_warehouse_data:
+  postgres_source_data:
+  postgres_metadata_data:
+  minio_data:

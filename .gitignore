@@ -1,0 +1,21 @@
+# Never commit secrets
+.env
+*.env.local
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Airflow
+logs/
+airflow.db
+
+# Data files (can be large)
+data/raw/*.csv
+data/raw/*.parquet
+
+# Docker volumes (generated locally)
+*.db

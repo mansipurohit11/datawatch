@@ -69,7 +69,7 @@ Yes, four separate PostgreSQL instances. No, that's not overkill. In real compan
 ### One command
 
 ```bash
-git clone https://github.com/kunjexe/datawatch.git
+git clone https://github.com/mansipurohit11/datawatch.git
 cd datawatch
 cp .env.example .env
 # fill in your keys in .env
